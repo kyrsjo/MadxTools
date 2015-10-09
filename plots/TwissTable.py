@@ -1,4 +1,5 @@
 import numpy as np
+import re
 
 def stripQuotes(inStr):
     outStr = inStr
@@ -16,8 +17,6 @@ class TwissTable:
     N = None
 
     def __init__(self,tfsName):
-        self.tfsName = tfsName
-        tfsFile = open(tfsName,'r')
 
         self.metadata = {}
         self.variableNames = []
@@ -26,13 +25,24 @@ class TwissTable:
         
         self.N = 0
 
+        #Read the file
+        self.tfsName = tfsName
+        tfsFile = open(tfsName,'r')
         for line in tfsFile.xreadlines():
             #print line
             if line[0]=="@":
                 #Metadata
                 ls = line.split()[1:]
-                ls[2]=stripQuotes(ls[2])
-                self.metadata[ls[0]] = (ls[1],ls[2])
+                if ls[1][-1]=="d":
+                    self.metadata[ls[0]] = int(ls[2])
+                elif ls[1][-1]=="e":
+                    self.metadata[ls[0]] = float(ls[2])
+                elif ls[1][-1]=="s":
+                    self.metadata[ls[0]] = stripQuotes(ls[2])
+                else:
+                    print "Unknown type '"+ls[1]+"' for metadata variable '"+ls[2]+"'"
+                    exit(1)
+
             elif line[0]=="*":
                 #Header/variable names
                 ls = line.split()[1:]
@@ -59,6 +69,27 @@ class TwissTable:
         #print self.variableTypes
         #print
         #print self.data
+
+    def convertToNumpy(self):
+        "Convert data to NumPy arrays"
+        for i in xrange(len(self.variableNames)):
+            vn = self.variableNames[i]
+            vt = self.variableTypes[i]
+            
+            if vt[-1]=="d":
+                #print vn,vt,"int"
+                self.data[vn] = np.asarray(self.data[vn],dtype="int")
+            elif vt[-1]=="e":
+                #print vn,vt,"float"
+                self.data[vn] = np.asarray(self.data[vn],dtype="float")
+            elif vt[-1]=="s":
+                #print vn,vt,"string"
+                self.data[vn] = np.asarray(map(stripQuotes,self.data[vn]),dtype="str")
+            else:
+                print "Unknown type '"+vt+"' for variable '"+vn+"'"
+                exit(1)
+        
+        
     
     elements = None
     def sliced_rebuild(self,maxSearch=None):
@@ -69,7 +100,7 @@ class TwissTable:
         self.elements = {}
         for i in xrange(self.N):
             #look for sliced element
-            name1 = stripQuotes(self.data["NAME"][i])
+            name1 = self.data["NAME"][i]
             ns1 = name1.split("..")
             if len(ns1) == 2:
                 if not ns1[0] in self.elements:
@@ -84,7 +115,7 @@ class TwissTable:
                     if maxSearch != None:
                         maxj = min(self.N,i+1+maxSearch)
                     for j in xrange(i+1, maxj):
-                        name2 = stripQuotes(self.data["NAME"][j])
+                        name2 = self.data["NAME"][j]
                         ns2 = name2.split("..")
                         if len(ns2)==2:
                             if ns2[0] == ns1[0]:

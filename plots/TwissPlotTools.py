@@ -1,6 +1,5 @@
 import matplotlib
 import matplotlib.pyplot as plt
-from TwissTable import stripQuotes
 
 def getColor(elemName):
     "Return standard colors for elements"
@@ -55,7 +54,7 @@ def drawThickElementMarkers(elements, yPOS, sMin=None):
 
 def drawThinElementMarkers(TT,yPOS,sMin=None,skipList=None):
     prevS = -1.0
-    for (i,s,name) in zip(xrange(TT.N),map(float,TT.data["S"]),map(stripQuotes,TT.data["NAME"])):
+    for (i,s,name) in zip(xrange(TT.N),TT.data["S"],TT.data["NAME"]):
         if sMin!=None and s < sMin:
             continue
 
