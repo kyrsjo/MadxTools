@@ -80,6 +80,7 @@ currElementName  = None
 currElementStart = None
 currElementEnd   = None
 elements = {}
+maxSearch = 500#None
 for i in xrange(TT.N):
     #look for sliced element
     name1 = stripQuotes(TT.data["NAME"][i])
@@ -93,7 +94,10 @@ for i in xrange(TT.N):
             
             sMin = float(TT.data["S"][i])
             sMax = float(TT.data["S"][i])
-            for j in xrange(i+1, TT.N):
+            maxj = TT.N
+            if maxSearch != None:
+                maxj = min(TT.N,i+1+maxSearch)
+            for j in xrange(i+1, maxj):
                 name2 = stripQuotes(TT.data["NAME"][j])
                 ns2 = name2.split("..")
                 if len(ns2)==2:
