@@ -14,14 +14,19 @@ def getColor(elemName):
         return "magenta"
     return "k"
 
-def drawThickElementMarkers(elements, yPOS, sMin=None):
+def drawThickElementMarkers(elements, yPOS, sMin=None,sMax=None):
     "Draw thick markers using the element types produced by TwissTable::sliced_rebuild."
     ax = plt.gca()
     for el in elements:
-        if sMin != None and el[1] < sMin:
-            continue
-        #print el
         sPOS = elements[el]
+        if sMin != None and sPOS[1] < sMin:
+            continue
+        elif sMax != None and sPOS[0] > sMax:
+            #print "SKIP",sMax,el[1]
+            continue
+
+        #print el
+
 
         textcolor=getColor(el)
 
@@ -52,10 +57,12 @@ def drawThickElementMarkers(elements, yPOS, sMin=None):
         )
 
 
-def drawThinElementMarkers(TT,yPOS,sMin=None,skipList=None):
+def drawThinElementMarkers(TT,yPOS,sMin=None,sMax=None,skipList=None):
     prevS = -1.0
     for (i,s,name) in zip(xrange(TT.N),TT.data["S"],TT.data["NAME"]):
         if sMin!=None and s < sMin:
+            continue
+        elif sMax != None and s > sMax:
             continue
 
         if float(TT.data["L"][i]) > 0.0:

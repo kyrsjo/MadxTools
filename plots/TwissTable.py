@@ -63,7 +63,9 @@ class TwissTable:
                 self.N += 1
                 #break
         tfsFile.close()
-
+        
+        assert self.N==len(self.data["NAME"])
+        
         #print self.metadata
         #print self.variableNames
         #print self.variableTypes
@@ -93,7 +95,8 @@ class TwissTable:
     
     elements = None
     def sliced_rebuild(self,maxSearch=None):
-        "Rebuil sliced elements. Argue"
+        "Rebuild sliced elements."
+        print "TwissTable::sliced_rebuild()..."
         currElementName  = None
         currElementStart = None
         currElementEnd   = None
@@ -107,7 +110,12 @@ class TwissTable:
                     #print "Searching for", ns1[0],i
 
                     idx = int(ns1[1])
-                    assert idx == 1
+                    #assert idx == 1, "Error in Slice_Rebuild"
+                    if idx != 1:
+                        print "Warning in TwissTable::sliced_rebuild()"
+                        print "\t Starting in the middle of a sliced element"
+                        print "\t Element name = '"+ns1[0]+"'"
+                        print "\t First idx =", idx
 
                     sMin = float(self.data["S"][i])
                     sMax = float(self.data["S"][i])
@@ -123,4 +131,39 @@ class TwissTable:
                                 idx += 1
                                 assert idx == int(ns2[1])
                                 sMax = float(self.data["S"][j])
+                    #print ns1[0],sMin,sMax
                     self.elements[ns1[0]] = (sMin,sMax)
+    
+    def shift(self,newFirst):
+        """"
+        Shift the sequence such that the element newFirst is the first in the sequence.
+        """
+        
+        #Find the index of the first element:
+        idx = -1
+        for (i,name) in zip(xrange(self.N),self.data["NAME"]):
+            if name == newFirst:
+                idx = i
+                break
+        if idx==-1:
+            print "No element named '"+newFirst+"' found"
+            exit(1)
+        
+        #Shift all the data arrays
+        for d in self.data:
+            self.data[d] = np.roll(self.data[d],-idx)
+        
+        #Rezero S
+        s0 = self.data["S"][0]
+        L  = self.metadata["LENGTH"]
+        for i in xrange(self.N):
+            self.data["S"][i] -= s0
+            if self.data["S"][i] < 0:
+                self.data["S"][i] += self.metadata["LENGTH"]
+        if self.data["S"][-1] == 0.0:
+            print "Warning in TwissTable::shift()"
+            print "\t Shifting last element from 0.0 to", self.metadata["LENGTH"]
+            self.data["S"][-1] = self.metadata["LENGTH"]
+
+        #Kill "elements" array which is no longer valid
+        self.elements = None
