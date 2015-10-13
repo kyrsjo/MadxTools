@@ -14,7 +14,7 @@ def getColor(elemName):
         return "magenta"
     return "k"
 
-def drawThickElementMarkers(elements, yPOS, sMin=None,sMax=None):
+def drawThickElementMarkers(elements, yPOS, sMin=None,sMax=None,isSymmetric=False):
     "Draw thick markers using the element types produced by TwissTable::sliced_rebuild."
     ax = plt.gca()
     for el in elements:
@@ -45,16 +45,28 @@ def drawThickElementMarkers(elements, yPOS, sMin=None,sMax=None):
         #     color=textcolor, ha="center")
         
         #Type 2 annotation
-        ax.add_patch(matplotlib.patches.Rectangle(
-            (sPOS[0],yPOS*0.0),sPOS[1]-sPOS[0],yPOS*1.2,
-            color=textcolor,alpha=0.5,edgecolor="none"
-        ))
-        plt.annotate(
-            el,
-            xy=(0.5*(sPOS[1]+sPOS[0]), yPOS), xycoords='data',
-            xytext=(0, 0), textcoords='offset points',
-            rotation="vertical",color=textcolor,va="center",ha="center"
-        )
+        if isSymmetric:
+            ax.add_patch(matplotlib.patches.Rectangle(
+                (sPOS[0],-yPOS*1.2),sPOS[1]-sPOS[0],yPOS*2.4,
+                color=textcolor,alpha=0.5,edgecolor="none"
+            ))
+            plt.annotate(
+                el,
+                xy=(0.5*(sPOS[1]+sPOS[0]), yPOS), xycoords='data',
+                xytext=(0, 0), textcoords='offset points',
+                rotation="vertical",color=textcolor,va="top",ha="center"
+            )
+        else:
+            ax.add_patch(matplotlib.patches.Rectangle(
+                (sPOS[0],-yPOS*1.2),sPOS[1]-sPOS[0],yPOS*2.4,
+                color=textcolor,alpha=0.5,edgecolor="none"
+            ))
+            plt.annotate(
+                el,
+                xy=(0.5*(sPOS[1]+sPOS[0]), yPOS), xycoords='data',
+                xytext=(0, 0), textcoords='offset points',
+                rotation="vertical",color=textcolor,va="top",ha="center"
+            )
 
 
 def drawThinElementMarkers(TT,yPOS,sMin=None,sMax=None,skipList=None):
@@ -90,7 +102,7 @@ def drawThinElementMarkers(TT,yPOS,sMin=None,sMax=None,skipList=None):
         textcolor=getColor(name)
 
         plt.axvline(s,ls="--",color=textcolor)
-        plt.text(s,yPOS,name,rotation="vertical",color=textcolor,va="center",ha="right")
+        plt.text(s,yPOS,name,rotation="vertical",color=textcolor,va="top",ha="right")
 
         #Print a few selected elements:
         # if name.startswith("TCT") or name.startswith("TAS") or name.startswith("TAN"):
