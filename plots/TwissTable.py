@@ -58,8 +58,10 @@ class TwissTable:
                 #Data
                 ls = line.split()
                 assert len(ls) == len(self.variableNames)
-                for (l,vn) in zip(ls,self.variableNames):
+                for (l,vn,vt) in zip(ls,self.variableNames,self.variableTypes):
                     self.data[vn].append(l)
+                    if vt=="%s":
+                        self.data[vn][-1]=stripQuotes(self.data[vn][-1])
                 self.N += 1
                 #break
         tfsFile.close()
@@ -86,7 +88,7 @@ class TwissTable:
                 self.data[vn] = np.asarray(self.data[vn],dtype="float")
             elif vt[-1]=="s":
                 #print vn,vt,"string"
-                self.data[vn] = np.asarray(map(stripQuotes,self.data[vn]),dtype="str")
+                self.data[vn] = np.asarray(self.data[vn],dtype="str")
             else:
                 print "Unknown type '"+vt+"' for variable '"+vn+"'"
                 exit(1)
@@ -167,3 +169,12 @@ class TwissTable:
 
         #Kill "elements" array which is no longer valid
         self.elements = None
+
+    def findDataIndex(self,columnName,pattern):
+        ret = []
+        for i in xrange(self.N):
+        #for i in xrange(5):
+            #print pattern, self.data[columnName][i]
+            if re.match(pattern,self.data[columnName][i]):
+                ret.append(i)
+        return ret
