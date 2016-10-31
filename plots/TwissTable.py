@@ -148,7 +148,7 @@ class TwissTable:
                 idx = i
                 break
         if idx==-1:
-            print "No element named '"+newFirst+"' found"
+            print "SHIFT("+self.tfsName+"): No element named '"+newFirst+"' found"
             exit(1)
         
         #Shift all the data arrays
